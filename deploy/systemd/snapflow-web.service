@@ -1,0 +1,29 @@
+# Native deployment (no Docker — see docs/deployment.md).
+# Copy to /etc/systemd/system/, set EnvironmentFile, then:
+#   systemctl daemon-reload && systemctl enable --now snapflow-web snapflow-worker
+[Unit]
+Description=SnapFlow Next.js web application
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=snapflow
+Group=snapflow
+WorkingDirectory=/opt/snapflow
+EnvironmentFile=/etc/snapflow/web.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/snapflow/node_modules/next/dist/bin/next start -p 3000
+Restart=on-failure
+RestartSec=5
+# Hardening: read-only code, writable tmp only
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+# Resource caps mirror compose-era limits
+MemoryMax=1G
+CPUQuota=100%
+
+[Install]
+WantedBy=multi-user.target

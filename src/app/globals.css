@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: `.dark` on <html>, toggled by ThemeToggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-ink-950: #0b0f1a;
+  --color-ink-900: #101828;
+  --color-ink-700: #344054;
+
+  --color-paper: #f7f8fb;
+  --color-surface: #ffffff;
+  --color-border: #e5e8ef;
+  --color-muted: #667085;
+
+  --color-accent-600: #4f46e5;
+  --color-accent-700: #4338ca;
+  --color-accent-50: #eef2ff;
+
+  --color-success-600: #059669;
+  --color-warning-600: #d97706;
+  --color-error-600: #dc2626;
+
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.06), 0 12px 32px -12px rgb(16 24 40 / 0.18);
+  --shadow-pop: 0 8px 24px -8px rgb(79 70 229 / 0.35);
+}
+
+:root {
+  --background: var(--color-paper);
+  --foreground: var(--color-ink-900);
+  color-scheme: light;
+}
+
+/*
+ * Dark theme: every semantic token flips, so token-based classes adapt
+ * automatically. Pairings stay legible by construction:
+ * - ink-950 (light) is used for button fills AND headings; paper is the
+ *   matching text color (near-white in light, near-black in dark).
+ * - accent-600 lightens for link contrast on dark backgrounds; solid
+ *   accent fills keep dark (paper) text for contrast.
+ */
+.dark {
+  --color-ink-950: #e9edf5;
+  --color-ink-900: #f2f4f7;
+  --color-ink-700: #b9c2d4;
+
+  --color-paper: #0b0f1a;
+  --color-surface: #141b2e;
+  --color-border: #263049;
+  --color-muted: #8b94a7;
+
+  --color-accent-600: #818cf8;
+  --color-accent-700: #a5b4fc;
+  --color-accent-50: #1c2450;
+
+  --color-success-600: #34d399;
+  --color-warning-600: #fbbf24;
+  --color-error-600: #f87171;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+
+  --background: var(--color-paper);
+  --foreground: var(--color-ink-900);
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-accent-600);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-600);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes sf-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sf-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes sf-spin {
+  to { transform: rotate(360deg); }
+}
+
+.anim-fade-up {
+  animation: sf-fade-up 0.45s ease both;
+}
+
+.anim-pulse-soft {
+  animation: sf-pulse-soft 1.6s ease-in-out infinite;
+}
+
+.spinner {
+  animation: sf-spin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .anim-fade-up,
+  .anim-pulse-soft,
+  .spinner {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

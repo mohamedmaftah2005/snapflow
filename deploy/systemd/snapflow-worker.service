@@ -1,0 +1,32 @@
+# Native deployment (no Docker — see docs/deployment.md).
+# Copy to /etc/systemd/system/, set EnvironmentFile, then:
+#   systemctl daemon-reload && systemctl enable --now snapflow-worker
+[Unit]
+Description=SnapFlow media worker (yt-dlp/FFmpeg via BullMQ)
+After=network.target postgresql.service redis-server.service snapflow-web.service
+Wants=postgresql.service redis-server.service
+# Queue draining on deploy: stop → finish current job → start new unit
+# (systemctl stop waits up to TimeoutStopSec for graceful shutdown)
+
+[Service]
+Type=simple
+User=snapflow
+Group=snapflow
+WorkingDirectory=/opt/snapflow
+EnvironmentFile=/etc/snapflow/worker.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/snapflow/node_modules/tsx/dist/cli.mjs ./src/worker/index.ts
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=300
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+# yt-dlp/FFmpeg are CPU- and tmp-heavy: cap both (PrivateTmp above
+# already isolates /tmp per service instance).
+MemoryMax=2G
+CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target
