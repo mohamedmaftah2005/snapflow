@@ -13,7 +13,7 @@ export default function HowItWorks() {
       </h2>
       <ol className="mt-6 grid gap-4 sm:grid-cols-3">
         {STEPS.map((s) => (
-          <li key={s.n} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 shadow-sm">
+          <li key={s.n} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-card)">
             <p className="text-xs font-bold text-(--color-muted)">{s.n}</p>
             <p className="mt-1 font-bold text-(--color-ink-950)">{s.title}</p>
             <p className="mt-1 text-sm leading-6 text-(--color-ink-700)">{s.text}</p>

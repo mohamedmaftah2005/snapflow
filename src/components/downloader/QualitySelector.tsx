@@ -108,7 +108,7 @@ function QualityRadio({
       className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
         current === k
           ? "border-(--color-accent-600) bg-(--color-accent-50) text-(--color-accent-600)"
-          : "border-(--color-border) bg-(--color-surface) text-(--color-ink-700)"
+          : "border-(--color-border) bg-(--color-surface) text-(--color-ink-700) hover:border-(--color-accent-600)"
       }`}
     >
       <input type="radio" name={group} value={k} checked={current === k}

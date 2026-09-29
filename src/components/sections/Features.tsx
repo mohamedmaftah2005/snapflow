@@ -16,7 +16,7 @@ export default function Features() {
       </h2>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((f) => (
-          <li key={f.title} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 shadow-sm">
+          <li key={f.title} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-card)">
             <p className="font-bold text-(--color-ink-950)">{f.title}</p>
             <p className="mt-1 text-sm leading-6 text-(--color-ink-700)">{f.text}</p>
           </li>

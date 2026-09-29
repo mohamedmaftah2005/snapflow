@@ -150,7 +150,7 @@ export default function DownloaderCard() {
       ) : null}
       <form
         onSubmit={handleSubmit}
-        className="rounded-3xl border border-(--color-border) bg-(--color-surface) p-4 shadow-(--shadow-card) sm:p-6"
+        className="rounded-3xl border border-(--color-border) bg-(--color-surface) p-4 shadow-(--shadow-card) transition-shadow focus-within:border-(--color-accent-600) focus-within:shadow-(--shadow-pop) sm:p-6"
       >
         <UrlInput
           id="tiktok-url"

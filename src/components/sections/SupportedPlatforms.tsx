@@ -12,7 +12,7 @@ export default function SupportedPlatforms() {
       </h2>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {providers.map((p) => (
-          <li key={p.id} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 shadow-sm">
+          <li key={p.id} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-card)">
             <p className="font-bold text-(--color-ink-950)">{p.name}</p>
             <p className="mt-1 text-sm leading-6 text-(--color-ink-700)">{p.blurb}</p>
             {p.contentTypes.length > 0 ? (

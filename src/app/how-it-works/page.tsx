@@ -52,7 +52,7 @@ export default function HowItWorksPage() {
       </p>
       <ol className="mt-8 space-y-4">
         {STEPS.map((s) => (
-          <li key={s.n} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 sm:p-6">
+          <li key={s.n} className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-card) sm:p-6">
             <p className="text-xs font-bold text-(--color-muted)">{s.n}</p>
             <h2 className="mt-1 text-lg font-bold text-(--color-ink-950)">{s.title}</h2>
             <p className="mt-1 text-sm leading-6 text-(--color-ink-700)">{s.body}</p>

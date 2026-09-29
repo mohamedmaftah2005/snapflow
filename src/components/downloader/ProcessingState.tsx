@@ -22,11 +22,12 @@ export default function ProcessingState({ status }: { status: DownloadStatus }) 
   if (!active) return null;
   return (
     <div aria-live="polite" className="anim-fade-up rounded-2xl border border-(--color-border) bg-(--color-surface) p-5">
-      <ol className="space-y-3">
+      <ol className="relative space-y-3">
+        <span aria-hidden="true" className="absolute top-4 bottom-4 left-3 w-px bg-(--color-border)" />
         {STEPS.map((step) => {
           const state = stepState(status, step.key);
           return (
-            <li key={step.key} className="flex items-center gap-3 text-sm">
+            <li key={step.key} className="relative flex items-center gap-3 text-sm">
               <span
                 aria-hidden="true"
                 className={`grid size-6 place-items-center rounded-full text-xs font-bold ${

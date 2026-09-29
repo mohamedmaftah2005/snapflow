@@ -111,6 +111,29 @@ body {
   animation: sf-fade-up 0.45s ease both;
 }
 
+/* Staggered hero entrance (CSS-only: safe without JS, disabled under reduced motion). */
+.anim-delay-1 { animation-delay: 0.06s; }
+.anim-delay-2 { animation-delay: 0.14s; }
+.anim-delay-3 { animation-delay: 0.22s; }
+.anim-delay-4 { animation-delay: 0.3s; }
+
+/*
+ * Ambient hero backdrop: two soft indigo blobs over a faint dot grid.
+ * Token-driven alphas via color-mix keep it tasteful in both themes.
+ */
+.hero-glow {
+  background:
+    radial-gradient(42rem 22rem at 50% -6rem, rgb(79 70 229 / 0.14), transparent 70%),
+    radial-gradient(28rem 16rem at 12% 8rem, rgb(79 70 229 / 0.08), transparent 70%),
+    radial-gradient(28rem 16rem at 88% 10rem, rgb(168 85 247 / 0.08), transparent 70%);
+}
+.dark .hero-glow {
+  background:
+    radial-gradient(42rem 22rem at 50% -6rem, rgb(129 140 248 / 0.22), transparent 70%),
+    radial-gradient(28rem 16rem at 12% 8rem, rgb(129 140 248 / 0.12), transparent 70%),
+    radial-gradient(28rem 16rem at 88% 10rem, rgb(192 132 252 / 0.12), transparent 70%);
+}
+
 .anim-pulse-soft {
   animation: sf-pulse-soft 1.6s ease-in-out infinite;
 }
