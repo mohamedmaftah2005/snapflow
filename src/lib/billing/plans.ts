@@ -13,11 +13,15 @@ export interface PlanCapabilities {
  * Capability model for Free vs Premium. Plans resolve through the
  * entitlement layer (`lib/entitlements.ts`) — never hardcoded branches.
  * Only capabilities actually implemented are listed here.
+ *
+ * SnapFlow is free for everyone with no account required: guests and
+ * free users both download without a daily cap. Abuse is controlled by
+ * per-IP rate limits, queue backpressure, and file-size caps instead.
  */
 export const PLANS: Record<PlanId, PlanCapabilities> = {
   free: {
     id: "free",
-    dailyDownloads: 20,
+    dailyDownloads: null,
     maxFileSizeBytes: 100 * 1024 * 1024,
     priorityQueue: false,
     apiAccess: false,
@@ -41,9 +45,6 @@ export function getPlanForRequest(): PlanCapabilities {
 export function canUse(cap: PlanCapabilities, feature: "priorityQueue" | "apiAccess" | "batchProcessing"): boolean {
   return cap[feature];
 }
-
-/** Anonymous users: strict server-side daily bucket (see entitlements). */
-export const GUEST_DAILY_DOWNLOADS = 5;
 
 /**
  * Effective per-plan file cap: the service enforces min(plan, env), so

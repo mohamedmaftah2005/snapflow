@@ -69,6 +69,10 @@ export default function ResultCard({
               ))}
             </div>
           )}
+          <p className="mt-3 text-xs text-(--color-muted)">
+            File metadata (titles, encoder tags) was removed. This doesn&apos;t
+            make the content yours — only save what you have the right to keep.
+          </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
             <button
               type="button"
@@ -76,8 +80,7 @@ export default function ResultCard({
               className="text-sm font-semibold text-(--color-accent-600) hover:underline"
             >
               Download another →
-            </button>
-            {firstUrl ? (
+            </button>            {firstUrl ? (
               <button
                 type="button"
                 onClick={copyLink}

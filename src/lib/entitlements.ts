@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { getAccountStore } from "@/lib/server";
-import { GUEST_DAILY_DOWNLOADS, PLANS, type PlanCapabilities, type PlanId } from "@/lib/billing/plans";
+import { PLANS, type PlanCapabilities, type PlanId } from "@/lib/billing/plans";
 import type { UserRecord } from "@/lib/accounts/types";
 
 export interface Entitlement {
@@ -36,8 +36,10 @@ export async function getEntitlement(user: UserRecord | null): Promise<Entitleme
 export async function reserveDownload(ent: Entitlement, ip: string): Promise<boolean> {
   const day = todayBucket();
   const store = getAccountStore();
-  // Guests get a stricter server-side bucket (never localStorage).
-  const limit = ent.authenticated ? ent.plan.dailyDownloads : GUEST_DAILY_DOWNLOADS;
+  // No daily caps for anyone: guests and free users are unbounded.
+  // Abuse is controlled by per-IP rate limits, queue backpressure,
+  // per-user in-flight caps, and file-size caps — never by identity.
+  const limit = ent.plan.dailyDownloads;
   const bucket = ent.userId
     ? { userId: ent.userId, day }
     : { guestKey: guestKeyFor(ip, day), day };
@@ -56,7 +58,7 @@ export async function refundDownload(ent: Entitlement, ip: string): Promise<void
 export async function usageFor(ent: Entitlement, ip: string): Promise<{ downloads: number; limit: number | null }> {
   const day = todayBucket();
   const store = getAccountStore();
-  const limit = ent.authenticated ? ent.plan.dailyDownloads : GUEST_DAILY_DOWNLOADS;
+  const limit = ent.plan.dailyDownloads;
   const bucket = ent.userId
     ? { userId: ent.userId, day }
     : { guestKey: guestKeyFor(ip, day), day };

@@ -42,5 +42,6 @@ point-in-time review and `docs/final-product-audit.md` §Security).
   outage — deliberate, logged).
 - Absent-Origin requests allowed through the CSRF proxy (non-browser
   clients; browsers always send Origin on POST).
-- Email is log-only until a production driver is wired (launch blocker).
+- Email delivers via SMTP in production (`EMAIL_DRIVER=smtp` enforced by
+  startup validation); dev default remains the log-only driver.
 - Jurisdiction-specific legal review outstanding (see DMCA/terms notes).

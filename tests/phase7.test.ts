@@ -7,8 +7,7 @@ import { __setEmailService } from "@/lib/email";
 import { getEntitlement, refundDownload, reserveDownload } from "@/lib/entitlements";
 import { applyPaymentEvent } from "@/lib/billing/subscriptions";
 import { TestPaymentDriver } from "@/lib/billing/test-driver";
-import { GUEST_DAILY_DOWNLOADS, PLANS } from "@/lib/billing/plans";
-import { env } from "@/lib/config/env";
+import { PLANS } from "@/lib/billing/plans";import { env } from "@/lib/config/env";
 import { GET as statusGET } from "@/app/api/download/[jobId]/route";
 import { GET as historyGET } from "@/app/api/downloads/route";
 import { PATCH as namePATCH } from "@/app/api/account/name/route";
@@ -112,19 +111,18 @@ describe("phase 7: accounts", () => {
 });
 
 describe("phase 7: entitlements & usage", () => {
-  it("plan table: guests 5/day, free 20/day, premium unbounded", () => {
-    expect(GUEST_DAILY_DOWNLOADS).toBe(5);
-    expect(PLANS.free.dailyDownloads).toBe(20);
+  it("plan table: guests and free are unbounded, premium keeps priority", () => {
+    expect(PLANS.free.dailyDownloads).toBeNull();
     expect(PLANS.premium.dailyDownloads).toBeNull();
     expect(PLANS.premium.priorityQueue).toBe(true);
   });
 
-  it("guest bucket enforces 5/day server-side", async () => {
+  it("guest bucket is unbounded server-side (abuse handled by rate limits)", async () => {
     const guest = { plan: PLANS.free, authenticated: false };
     const ip = `10.9.9.${n++}`;
     const wins: boolean[] = [];
     for (let i = 0; i < 7; i++) wins.push(await reserveDownload(guest, ip));
-    expect(wins.filter(Boolean)).toHaveLength(5);
+    expect(wins.filter(Boolean)).toHaveLength(7);
     await refundDownload(guest, ip);
     expect(await reserveDownload(guest, ip)).toBe(true);
   });

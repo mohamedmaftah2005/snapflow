@@ -165,6 +165,36 @@ export async function processDownload(jobId: string, deps: PipelineDeps): Promis
     }
     if (result.items.length === 0) throw new AppError("PROCESSING_FAILED", "Empty result");
 
+    // Metadata strip: lossless stream-copy remux (no re-encode) removing
+    // container tags. Best-effort by design — a strip failure keeps the
+    // original file and never fails the download.
+    try {
+      const { isEnabled } = await import("@/lib/admin/flags");
+      if (await isEnabled("metadata_strip", true)) {
+        const { env: liveEnv } = await import("@/lib/config/env");
+        const { stripOneFile } = await import("@/lib/media/strip");
+        const { checkBinaryAvailable, runBinary } = await import("@/services/downloader/ytdlp");
+        for (const item of result.items) {
+          if (!item.localPath) continue;
+          const out = await stripOneFile(
+            { jobId, localPath: item.localPath },
+            {
+              ffmpegPath: liveEnv.ffmpegPath,
+              timeoutMs: 30_000,
+              checkBinary: (bin, args) => checkBinaryAvailable(bin, args),
+              run: (bin, args, opts) => runBinary(bin, args, opts),
+            }
+          );
+          if (out.filesize !== undefined) item.filesize = out.filesize;
+        }
+        log(jobId, "metadata stripped", { items: result.items.length });
+      }
+    } catch (err) {
+      log(jobId, "metadata strip skipped", {
+        message: err instanceof Error ? err.message.slice(0, 120) : String(err).slice(0, 120),
+      });
+    }
+
     // Cooperative cancellation: a cancel arriving mid-download stops
     // the job before upload. Tmp is cleaned by the finally block.
     const fresh = await repo.get(jobId);

@@ -8,7 +8,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   const guard = await authGuard(req);
   if (guard) return guard;
   const { isEnabled } = await import("@/lib/admin/flags");
-  if (!(await isEnabled("registration_enabled", true))) {
+  if (!(await isEnabled("registration_enabled", false))) {
     return NextResponse.json(errBody("BAD_REQUEST", "Registration is currently disabled."), { status: 503 });
   }
   const body = await readAuthBody(req, ["email", "password", "name"]);

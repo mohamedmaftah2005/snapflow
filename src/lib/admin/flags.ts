@@ -86,7 +86,7 @@ export const FLAG_DEFS = [
   { key: "provider_instagram_enabled", envDefault: env.enableInstagram, description: "Instagram provider availability." },
   { key: "provider_instagram_maintenance", envDefault: false, description: "Instagram degraded notice; jobs rejected while on." },
   { key: "guest_downloads_enabled", envDefault: env.enableGuestDownloads, description: "Anonymous downloads." },
-  { key: "registration_enabled", envDefault: env.enableAuth, description: "New account registration." },
+  { key: "registration_enabled", envDefault: false, description: "New account registration. Closed by default; existing accounts and admin login are unaffected. Re-enable via the admin flags panel or a feature_flags DB row to create new accounts." },
   { key: "batch_downloads", envDefault: true, description: "Multi-URL batch workspace." },
   { key: "audio_extraction", envDefault: true, description: "MP3 audio extraction via FFmpeg." },
   { key: "advanced_quality", envDefault: true, description: "Quality selection beyond Auto." },
@@ -97,6 +97,7 @@ export const FLAG_DEFS = [
   { key: "affiliates_enabled", envDefault: true, description: "Affiliate applications and commission tracking." },
   { key: "api_enabled", envDefault: true, description: "Public developer API (v1). Off = all keyed requests rejected." },
   { key: "marketing_enabled", envDefault: true, description: "Marketing email + campaign runs. Transactional mail unaffected." },
+  { key: "metadata_strip", envDefault: true, description: "Strip container metadata from downloaded media (lossless remux). Off = deliver files as received." },
 ];
 
 /** Provider status honoring runtime flags (env = default, DB = override). */

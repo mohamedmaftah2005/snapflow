@@ -28,7 +28,9 @@ export default function PrivacyPage() {
         <p>
           Generated media files are temporary by design and expire automatically (currently
           after 30 minutes), after which they are deleted from storage. We do not keep a
-          permanent archive of your downloads.
+          permanent archive of your downloads. Before a file is served, embedded container
+          metadata (titles, encoder tags, timestamps) is removed with a lossless remux —
+          the picture and sound are untouched.
         </p>
         <h2 className="pt-2 text-base font-bold text-(--color-ink-950)">Analytics</h2>
         <p>

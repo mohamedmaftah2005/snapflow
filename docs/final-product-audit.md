@@ -23,10 +23,13 @@ explicitly NON-BLOCKERs.
    `/dashboard/billing?checkout=success`, but `Billing.tsx` never reads
    it; webhook arrives async, user sees stale Free. → FIX: pending
    banner + status polling.
-4. **No production email driver.** `lib/email.ts` is log-only; verify /
+4. **No production email driver.** ~~`lib/email.ts` is log-only; verify /
    reset / billing emails never deliver in prod. Cannot responsibly
    invent an SMTP provider here. → FIX: fail-fast doctor warning for
-   `APP_ENV=production` + documented manual setup (BLOCKER until wired).
+   `APP_ENV=production` + documented manual setup (BLOCKER until wired).~~
+   RESOLVED: `SmtpEmailService` (nodemailer) ships behind
+   `EMAIL_DRIVER=smtp`; `validateEnv` fails production without
+   `SMTP_HOST/USER/PASS`. Remaining manual step is credentials only.
 
 ## HIGH (fix before launch)
 

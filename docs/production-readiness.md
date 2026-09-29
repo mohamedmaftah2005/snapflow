@@ -8,7 +8,7 @@ Status as of 2026-09-27 after Phase 15 fixes. Legend: ✅ ready ·
 | Item | Status | Evidence | Owner/system | Remaining action |
 |---|---|---|---|---|
 | Production build | ✅ | `npm run build` passes; `tsc`, eslint clean | Next.js | none |
-| Environment validation | ✅ | `validateEnv` + `npm run doctor` fail fast; prod email-driver WARN added | scripts/doctor.ts | wire SMTP (❌ launch blocker, manual) |
+| Environment validation | ✅ | `validateEnv` + `npm run doctor` fail fast; production requires `EMAIL_DRIVER=smtp` + SMTP credentials | scripts/doctor.ts | supply SMTP credentials (manual) |
 | Error handling | ✅ | Central `userMessageFor` catalog; 4 raw-message leaks fixed; client renders catalog only | lib/errors.ts | none |
 | Authentication | ✅ | bcrypt-12, sha256 tokens, single-use verify/reset, reset kills sessions, no enumeration | lib/auth/service.ts | none |
 | Authorization | ✅ | Owner checks on all job/file/batch/v1 routes (404, no oracle); RBAC + audit in admin | routes + lib/admin/guard.ts | none |

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import QualitySelector, { type QualityChoice } from "@/components/downloader/QualitySelector";
 import { track } from "@/lib/analytics";
 
@@ -212,7 +211,7 @@ export default function BatchWorkspace() {
       ) : null}
 
       <p className="text-center text-xs text-(--color-muted)">
-        Batches count against your daily limit. <Link className="underline" href="/dashboard/history">View history</Link>
+        Batch downloads are free — no account needed.
       </p>
     </div>
   );

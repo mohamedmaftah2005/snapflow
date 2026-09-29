@@ -93,6 +93,14 @@ export const env = {
   minimumPayoutCents: num("MINIMUM_PAYOUT_CENTS", 5000),
   maxMarketingEmails: num("MAX_MARKETING_EMAILS_PER_PERIOD", 4),
   emailFromAddress: str("EMAIL_FROM_ADDRESS", "noreply@snapflow.app"),
+  // Transactional email driver: "log" (dev default, writes nothing) or
+  // "smtp" (production: verification, reset, and billing mail deliver).
+  emailDriver: str("EMAIL_DRIVER", "log"),
+  smtpHost: opt("SMTP_HOST"),
+  smtpPort: num("SMTP_PORT", 587),
+  smtpSecure: str("SMTP_SECURE", "false") === "true",
+  smtpUser: opt("SMTP_USER"),
+  smtpPass: opt("SMTP_PASS"),
   stallTimeoutMs: num("STALL_TIMEOUT_MS", 150_000),
   // --- Phase 14: performance, scalability & cost engineering ---
   dbStatementTimeoutMs: num("DB_STATEMENT_TIMEOUT_MS", 15_000),

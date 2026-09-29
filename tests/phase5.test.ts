@@ -106,12 +106,12 @@ describe("phase 5: seo, analytics, growth", () => {
     });
   });
 
-  it("feature flags default off and premium model is free-only", () => {
+  it("feature flags default off and downloads are free for everyone", () => {
     expect(publicFlags.ads).toBe(false);
     expect(publicFlags.analytics).toBe(false);
     expect(getPlanForRequest().id).toBe("free");
     expect(canUse(PLANS.free, "apiAccess")).toBe(false);
     expect(canUse(PLANS.premium, "apiAccess")).toBe(true);
-    expect(PLANS.free.dailyDownloads).toBe(20);
+    expect(PLANS.free.dailyDownloads).toBeNull();
   });
 });

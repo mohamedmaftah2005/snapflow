@@ -10,7 +10,7 @@ No values here are secrets. Actual credentials live in
 | Redis | optional (`QUEUE_DRIVER=local` default without URL) | separate staging Redis | dedicated prod Redis |
 | Storage | local driver (`TEMP_DIR`) | separate staging bucket/prefix | prod bucket + lifecycle policy |
 | Billing | `BILLING_PROVIDER=test` | test mode (Stripe test keys) | live keys; `TEST_WEBHOOK_SECRET` unset |
-| Email | log driver (console) | log driver; no real sends | ❌ BLOCKER: wire SMTP/Resend driver first |
+| Email | log driver (`EMAIL_DRIVER=log`) | log driver; no real sends | `EMAIL_DRIVER=smtp` + `SMTP_HOST/USER/PASS` (doctor fails fast without them) |
 | Webhooks | loopback allowed only locally (`WEBHOOK_ALLOW_PRIVATE=false` elsewhere) | staging endpoints | prod endpoints; separate secrets |
 | Metrics | no token needed locally | staging `METRICS_TOKEN` | unique prod `METRICS_TOKEN` |
 | Analytics | `NEXT_PUBLIC_ENABLE_ANALYTICS=false` | consent banner on | consent banner on |

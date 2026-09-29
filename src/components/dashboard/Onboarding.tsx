@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { track } from "@/lib/analytics";
-import { GUEST_DAILY_DOWNLOADS } from "@/lib/billing/plans";
 
 const DONE_KEY = "sf_onb_done";
 
@@ -73,7 +72,7 @@ export default function Onboarding({ hasCompletedJob }: { hasCompletedJob: boole
             <li>Find it anytime under <Link className="font-semibold text-(--color-accent-600) hover:underline" href="/dashboard/history">History</Link>.</li>
           </ol>
           <p className="mt-2 text-xs text-(--color-muted)">
-            Guests get {GUEST_DAILY_DOWNLOADS} downloads a day; a free account raises that limit.
+            Free forever — no account needed, no download caps.
           </p>
         </div>
         <button type="button" onClick={skip}

@@ -14,7 +14,7 @@ export interface EnvIssue {
   problem: string;
 }
 
-const SECRET_LIKE = ["SECRET", "PASSWORD", "PRIVATE", "TOKEN", "SIGNING", "PEPPER", "CREDENTIAL"];
+const SECRET_LIKE = ["SECRET", "PASSWORD", "PASS", "PRIVATE", "TOKEN", "SIGNING", "PEPPER", "CREDENTIAL"];
 
 /**
  * Startup validation. Production fails fast on missing/insecure config;
@@ -45,6 +45,15 @@ export function validateEnv(env: Record<string, string | undefined>, target: App
       need("STRIPE_SECRET_KEY", "required for the stripe driver");
       need("STRIPE_WEBHOOK_SECRET", "required to verify Stripe webhooks");
       need("STRIPE_PRICE_PREMIUM", "required for checkout");
+    }
+    // Verification, reset, and billing mail must actually deliver in
+    // production — the log driver silently drops them.
+    if (env.EMAIL_DRIVER !== "smtp") {
+      issues.push({ variable: "EMAIL_DRIVER", problem: "must be smtp in production (verification/reset/billing mail must deliver)" });
+    } else {
+      need("SMTP_HOST", "required for the smtp driver");
+      need("SMTP_USER", "required for the smtp driver");
+      need("SMTP_PASS", "required for the smtp driver");
     }
     for (const [k, v] of Object.entries(env)) {
       if (!v) continue;

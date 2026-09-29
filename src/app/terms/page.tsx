@@ -33,11 +33,12 @@ export default function TermsPage() {
         </p>
         <h2 className="pt-2 text-base font-bold text-(--color-ink-950)">Accounts and subscriptions</h2>
         <p>
-          Accounts are optional for basic downloads. Free accounts receive higher daily
-          limits than guests; Premium subscriptions raise limits further and grant queue
-          priority. Subscriptions renew automatically until canceled; canceling takes effect
-          at the end of the paid period, after which Free limits apply. Payments are handled
-          by our payment provider — we never see card details.
+          SnapFlow is free and needs no account: downloads are unlimited,
+          subject only to rate limits and queue backpressure that keep the
+          service fast for everyone. Public registration is closed; any
+          legacy accounts keep the access they already had. Downloads are
+          rate-limited, files are temporary and expire automatically, and
+          limits may change to protect the service.
         </p>
         <h2 className="pt-2 text-base font-bold text-(--color-ink-950)">Limitation of liability</h2>
         <p>

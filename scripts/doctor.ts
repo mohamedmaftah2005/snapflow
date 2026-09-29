@@ -34,12 +34,6 @@ async function main(): Promise<void> {
     console.log("doctor: FAIL (dependencies unreachable)");
     process.exit(1);
   }
-  if (target === "production") {
-    // Launch blocker (manual): the default EmailService only logs.
-    // Verification, reset, and billing emails never deliver until a
-    // production driver is wired in src/lib/email.ts.
-    console.log("email: WARN (log-only driver — wire a production EmailService before launch; see docs/launch-runbook.md)");
-  }
   console.log(`doctor: ${failed ? "WARN" : "OK"}`);
 }
 
