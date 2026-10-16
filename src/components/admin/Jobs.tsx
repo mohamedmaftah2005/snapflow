@@ -8,7 +8,7 @@ const STATUSES = ["", "QUEUED", "PROCESSING", "UPLOADING", "COMPLETED", "FAILED"
 
 interface Row {
   id: string; provider: string; status: string; userId: string | null;
-  title: string; createdAt: number; errorCode?: string;
+  title: string; sourceUrl: string | null; createdAt: number; errorCode?: string;
 }
 
 export default function Jobs() {
@@ -45,6 +45,14 @@ export default function Jobs() {
                     <p className="truncate font-mono text-xs text-(--color-muted)">
                       {j.id} · {j.provider}{j.errorCode ? ` · ${j.errorCode}` : ""}
                     </p>
+                    {j.sourceUrl ? (
+                      <p className="truncate text-xs">
+                        <a href={j.sourceUrl} target="_blank" rel="noreferrer"
+                          className="break-all text-(--color-accent-600) hover:underline">
+                          {j.sourceUrl}
+                        </a>
+                      </p>
+                    ) : null}
                   </div>
                   <Badge value={j.status} />
                 </div>

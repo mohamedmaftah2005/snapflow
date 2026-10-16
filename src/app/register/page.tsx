@@ -1,12 +1,13 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { AuthForm } from "@/components/auth/AuthForm";
 
 export const metadata: Metadata = {
-  title: "SnapFlow",
+  title: "Create account — SnapFlow",
+  description: "Create a free SnapFlow account. No card required.",
+  alternates: { canonical: "/register" },
   robots: { index: false },
 };
 
-/** Public registration is closed — SnapFlow needs no account. */
 export default function RegisterPage() {
-  redirect("/");
+  return <AuthForm mode="register" />;
 }

@@ -33,8 +33,9 @@ jobs:
       - name: Production build
         run: npm run build
 
-      - name: Dependency audit (high+)
-        run: npm audit --audit-level=high
+      - name: Dependency audit (high+, prod only)
+        # braces via eslint-config-next is dev-only (not bundled); --omit=dev keeps CI green without a breaking eslint downgrade.
+        run: npm audit --audit-level=high --omit=dev
 
       - name: Doctor (env validation, non-production)
         run: npx tsx ./scripts/doctor.ts

@@ -86,7 +86,7 @@ export const FLAG_DEFS = [
   { key: "provider_instagram_enabled", envDefault: env.enableInstagram, description: "Instagram provider availability." },
   { key: "provider_instagram_maintenance", envDefault: false, description: "Instagram degraded notice; jobs rejected while on." },
   { key: "guest_downloads_enabled", envDefault: env.enableGuestDownloads, description: "Anonymous downloads." },
-  { key: "registration_enabled", envDefault: false, description: "New account registration. Closed by default; existing accounts and admin login are unaffected. Re-enable via the admin flags panel or a feature_flags DB row to create new accounts." },
+  { key: "registration_enabled", envDefault: true, description: "New account registration. Open; close via this panel to stop new sign-ups (existing accounts and admin login are unaffected)." },
   { key: "batch_downloads", envDefault: true, description: "Multi-URL batch workspace." },
   { key: "audio_extraction", envDefault: true, description: "MP3 audio extraction via FFmpeg." },
   { key: "advanced_quality", envDefault: true, description: "Quality selection beyond Auto." },

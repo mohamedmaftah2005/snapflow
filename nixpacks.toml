@@ -1,0 +1,5 @@
+# Railway / Nixpacks: the worker service needs media binaries that are
+# not in the default Node image. Additive to Nixpacks' defaults.
+# (Vercel and local dev ignore this file.)
+[phases.setup]
+nixPkgs = ["ffmpeg", "yt-dlp"]

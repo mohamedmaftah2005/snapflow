@@ -78,7 +78,9 @@ export async function cleanupStaleTempDirs(root?: string, maxAgeMs?: number): Pr
   const maxAge = maxAgeMs ?? env.staleTmpMs;
   let entries: { name: string }[];
   try {
-    entries = (await fs.readdir(dir, { withFileTypes: true }))
+    // Runtime temp sweep only (os.tmpdir/TEMP_DIR) — never part of the bundle.
+    // turbopackIgnore: don't trace whole project for this dynamic path.
+    entries = (await fs.readdir(/*turbopackIgnore: true*/ dir, { withFileTypes: true }))
       .filter((e) => e.isDirectory())
       .map((e) => ({ name: e.name }));
   } catch {

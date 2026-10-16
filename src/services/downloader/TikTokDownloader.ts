@@ -13,6 +13,21 @@ function baseTempDir(): string {
   return env.tempDir && env.tempDir.length > 0 ? env.tempDir : path.join(os.tmpdir(), "snapflow");
 }
 
+/**
+ * Shared network tuning for every yt-dlp spawn. Fragmented (HLS/DASH)
+ * downloads fetch pieces in parallel instead of serially; bounded retries
+ * fail fast on dead links instead of hanging through yt-dlp's long
+ * defaults. Single-file progressive downloads are unaffected.
+ */
+const FAST_NET_ARGS = [
+  "--concurrent-fragments",
+  "4",
+  "--retries",
+  "3",
+  "--fragment-retries",
+  "3",
+];
+
 export function jobDir(jobId: string): string {
   return path.join(baseTempDir(), jobId);
 }
@@ -70,8 +85,8 @@ export class TikTokDownloader implements MediaDownloader {
     log(jobId, "yt-dlp metadata started");
     const res = await runBinary(
       env.ytDlpPath,
-      ["--dump-single-json", "--no-playlist", "--no-warnings", "--socket-timeout", "15", normalizedUrl],
-      { timeoutMs: Math.min(env.jobTimeoutMs, 60_000) }
+      ["--dump-single-json", "--no-playlist", "--no-warnings", "--socket-timeout", "10", ...FAST_NET_ARGS, normalizedUrl],
+      { timeoutMs: Math.min(env.jobTimeoutMs, 45_000) }
     );
     if (res.exitCode !== 0) throw mapYtDlpFailure(res.stderr, res.exitCode);
     let parsed: YtDlpJson;
@@ -95,8 +110,16 @@ export class TikTokDownloader implements MediaDownloader {
       throw new AppError("FFMPEG_UNAVAILABLE");
     }
     const out = audioOnly ? audioOutputPath(jobId) : outputPath(jobId);
+    // Auto = highest quality first: best video + best audio merged
+    // (fallback: best single file). Container-first selectors like
+    // mp4/best[ext=mp4] can lock a lower-res mp4 when the top stream is
+    // webm; --merge-output-format mp4 below still guarantees mp4 output.
     const formatFlag =
-      format.kind === "video" ? videoFormatSelector(format.maxHeight) : "mp4/best[ext=mp4]/best";
+      format.kind === "video" ? videoFormatSelector(format.maxHeight) : "bv*+ba/b";
+    // Title/thumbnail/duration are display-only: fetch them CONCURRENTLY
+    // with the download instead of sequentially after it (used to add a
+    // full extra yt-dlp round trip per job). Best-effort, never fatal.
+    const metaPromise = this.getMetadata(normalizedUrl).catch(() => null);
     log(jobId, "yt-dlp download started");
     try {
       const res = await runBinary(
@@ -106,6 +129,7 @@ export class TikTokDownloader implements MediaDownloader {
           "--no-warnings",
           "--socket-timeout",
           "15",
+          ...FAST_NET_ARGS,
           ...(audioOnly ? audioExtractArgs() : ["-f", formatFlag]),
           "--max-filesize",
           String(env.maxFileSizeBytes),
@@ -126,13 +150,8 @@ export class TikTokDownloader implements MediaDownloader {
       }
       log(jobId, "download completed", { bytes: stat.size });
 
-      // Best-effort metadata for title/duration (non-fatal if it fails).
-      let meta: MediaMetadata | null = null;
-      try {
-        meta = await this.getMetadata(normalizedUrl);
-      } catch {
-        meta = null;
-      }
+      // Metadata already fetched in parallel above; just collect it.
+      const meta = await metaPromise;
 
       const expiresAt = new Date(Date.now() + env.fileTtlMs).toISOString();
       return {

@@ -28,6 +28,7 @@ export default function ResultCard({
   const [copied, setCopied] = useState(false);
   const firstUrl = result.downloads[0]?.url;
   const multi = result.downloads.length > 1;
+  const isAudio = result.mediaType === "AUDIO" || result.downloads[0]?.container === "mp3";
   const providerLabel = result.provider
     ? result.provider.charAt(0).toUpperCase() + result.provider.slice(1)
     : null;
@@ -45,15 +46,34 @@ export default function ResultCard({
   return (
     <section aria-live="polite" className="anim-fade-up overflow-hidden rounded-3xl border border-(--color-border) bg-(--color-surface) shadow-(--shadow-card)">
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:p-6">
-        <div
-          aria-hidden="true"
-          className="grid h-44 w-full shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#101828] via-[#1d2939] to-[#4f46e5] text-white sm:h-auto sm:w-44"
-        >
-          <div className="text-center">
-            <p className="text-3xl">▶</p>
-            <p className="mt-1 text-xs font-semibold tracking-wide opacity-80">{formatDuration(result.duration)}</p>
+        {isAudio ? (
+          <div className="grid w-full shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#101828] via-[#1d2939] to-[#4f46e5] p-5 text-white sm:w-44">
+            <div className="w-full text-center">
+              <p className="text-3xl" aria-hidden="true">♪</p>
+              <p className="mt-1 text-xs font-semibold tracking-wide opacity-80">{formatDuration(result.duration)}</p>
+              {firstUrl ? <audio controls preload="metadata" src={firstUrl} className="mt-3 w-full" /> : null}
+            </div>
           </div>
-        </div>
+        ) : firstUrl ? (
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            src={firstUrl}
+            poster={result.thumbnail}
+            className="h-44 w-full shrink-0 rounded-2xl bg-black object-contain sm:h-auto sm:w-44"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="grid h-44 w-full shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#101828] via-[#1d2939] to-[#4f46e5] text-white sm:h-auto sm:w-44"
+          >
+            <div className="text-center">
+              <p className="text-3xl">▶</p>
+              <p className="mt-1 text-xs font-semibold tracking-wide opacity-80">{formatDuration(result.duration)}</p>
+            </div>
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold tracking-widest text-(--color-accent-600) uppercase">
             Ready to save{providerLabel ? ` · ${providerLabel}` : ""}{result.isMock ? " · demo data" : ""}
@@ -73,14 +93,15 @@ export default function ResultCard({
             File metadata (titles, encoder tags) was removed. This doesn&apos;t
             make the content yours — only save what you have the right to keep.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={onReset}
-              className="text-sm font-semibold text-(--color-accent-600) hover:underline"
+              className="rounded-full border border-(--color-accent-600) bg-(--color-accent-50) px-4 py-2 text-sm font-semibold text-(--color-accent-600) hover:opacity-90"
             >
               Download another →
-            </button>            {firstUrl ? (
+            </button>
+            {firstUrl ? (
               <button
                 type="button"
                 onClick={copyLink}

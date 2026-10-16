@@ -14,13 +14,11 @@ import type {
 import UrlInput from "./UrlInput";
 import DownloadButton from "./DownloadButton";
 import ProcessingState from "./ProcessingState";
-import QualitySelector, { type QualityChoice } from "./QualitySelector";
 import ResultCard from "./ResultCard";
 import ErrorState from "./ErrorState";
 
 export default function DownloaderCard() {
   const [url, setUrl] = useState("");
-  const [quality, setQuality] = useState<QualityChoice>({ kind: "auto", label: "Best available" });
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<DownloadStatus>("idle");
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -91,14 +89,15 @@ export default function DownloaderCard() {
     track("download_started", { provider: "tiktok" });
 
     try {
+      // No quality prompt: the server always fetches the best available
+      // quality automatically (opts omitted → kind "auto").
       const media = await apiDownloader.createDownload(
         url,
         (job: DownloadJob) => {
           if (requestId.current !== myRequest) return;
           setStatus(job.status);
           if (job.id && job.id !== "api") setJobId(job.id);
-        },
-        { format: quality.kind === "auto" ? { kind: "auto" } : quality.kind === "audio" ? { kind: "audio" } : { kind: "video", maxHeight: quality.maxHeight ?? 720 } }
+        }
       );
       if (requestId.current !== myRequest) return;
       setDoneUrl(validation.normalizedUrl ?? url.trim());
@@ -160,9 +159,9 @@ export default function DownloaderCard() {
           onChange={handleChange}
           onPasteEvent={() => track("paste_url", { provider: "tiktok" })}
         />
-        <div className="mt-3">
-          <QualitySelector url={url} value={quality} onChange={setQuality} />
-        </div>
+        <p className="mt-3 text-center text-xs font-semibold text-(--color-ink-700)">
+          Best available quality is picked automatically.
+        </p>
         <div className="mt-3">
           <DownloadButton status={status} />
         </div>

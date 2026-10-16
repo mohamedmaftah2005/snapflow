@@ -8,19 +8,29 @@ export function AuthForm({
   mode,
   token,
   notice,
+  next,
 }: {
   mode: "login" | "register" | "forgot" | "reset";
   token?: string;
   /** One-time context notice (e.g. session expiry), set by the page. */
   notice?: string;
+  /** Post-auth destination. Only honored when it is a safe same-origin path. */
+  next?: string;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+
+  // Open-redirect guard: same-origin absolute paths only (no //, no backslash).
+  const dest =
+    typeof next === "string" && /^\/(?!\/)/.test(next) && !next.includes("\\")
+      ? next
+      : "/dashboard";
 
   const endpoint =
     mode === "login"
@@ -34,6 +44,26 @@ export function AuthForm({
   async function submit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setError(null);
+    // Instant client-side checks (server re-validates authoritatively).
+    if (mode !== "reset") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        setError("Enter a valid email address.");
+        return;
+      }
+    }
+    if (mode === "register") {
+      if (password.length < 10) {
+        setError("Password must be at least 10 characters.");
+        return;
+      }
+      if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+        setError("Password must contain letters and numbers.");
+        return;
+      }
+    } else if ((mode === "login" || mode === "reset") && password.length === 0) {
+      setError("Enter your password.");
+      return;
+    }
     setBusy(true);
     try {
       const body: Record<string, string> =
@@ -68,7 +98,7 @@ export function AuthForm({
         setDone("Password updated. You can now sign in.");
         return;
       }
-      router.push("/dashboard");
+      router.push(dest);
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
@@ -98,7 +128,7 @@ export function AuthForm({
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-semibold">Email</label>
             <input
-              id="email" type="email" required autoComplete="email" value={email}
+              id="email" type="email" required autoComplete="email" autoFocus value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-12 w-full rounded-xl border border-(--color-border) px-3 text-[16px]"
             />
@@ -119,13 +149,23 @@ export function AuthForm({
             <label htmlFor="password" className="mb-1 block text-sm font-semibold">
               {mode === "reset" ? "New password" : "Password"}
             </label>
-            <input
-              id="password" type="password" required
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              value={password} onChange={(e) => setPassword(e.target.value)}
-              className="h-12 w-full rounded-xl border border-(--color-border) px-3 text-[16px]"
-              aria-describedby={mode === "register" ? "password-rules" : undefined}
-            />
+            <div className="relative">
+              <input
+                id="password" type={showPassword ? "text" : "password"} required
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                className="h-12 w-full rounded-xl border border-(--color-border) px-3 pr-16 text-[16px]"
+                aria-describedby={mode === "register" ? "password-rules" : undefined}
+              />
+              <button
+                type="button" onClick={() => setShowPassword((v) => !v)}
+                aria-pressed={showPassword}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-(--color-accent-600) hover:underline"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
             {mode === "register" ? (
               <p id="password-rules" className="mt-1 text-xs text-(--color-muted)">
                 At least 10 characters with letters and numbers.

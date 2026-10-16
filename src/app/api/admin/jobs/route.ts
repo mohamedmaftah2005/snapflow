@@ -31,7 +31,8 @@ export async function GET(req: Request): Promise<NextResponse> {
     data: {
       jobs: jobs.map((j) => ({
         id: j.id, provider: j.provider, status: j.status, userId: j.userId ?? null,
-        title: j.title ?? "Media", createdAt: j.createdAt, startedAt: j.startedAt,
+        title: j.title ?? "Media", sourceUrl: j.sourceUrl ?? null,
+        createdAt: j.createdAt, startedAt: j.startedAt,
         completedAt: j.completedAt, durationMs: j.startedAt && j.completedAt ? j.completedAt - j.startedAt : null,
         fileSize: j.fileSize, errorCode: j.errorCode,
       })),

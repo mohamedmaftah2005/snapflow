@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams?: { expired?: string };
+  searchParams?: { expired?: string; next?: string };
 }) {
   const notice =
     searchParams?.expired === "1"
       ? "Your session expired. Please sign in again."
       : undefined;
-  return <AuthForm mode="login" notice={notice} />;
+  return <AuthForm mode="login" notice={notice} next={searchParams?.next} />;
 }

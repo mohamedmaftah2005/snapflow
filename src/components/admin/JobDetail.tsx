@@ -29,6 +29,12 @@ export default function JobDetail({ id }: { id: string }) {
       <div className="mt-4 grid gap-3 lg:grid-cols-2">
         <div className="rounded-2xl border border-(--color-border) bg-(--color-surface) p-5 text-sm">
           <p><span className="text-(--color-muted)">Title:</span> {data.title}</p>
+          <p><span className="text-(--color-muted)">Source:</span>{" "}
+            {data.sourceId && data.sourceId.startsWith("http") ? (
+              <a href={data.sourceId} target="_blank" rel="noreferrer"
+                className="break-all text-(--color-accent-600) hover:underline">{data.sourceId}</a>
+            ) : (data.sourceId ?? "—")}
+          </p>
           <p><span className="text-(--color-muted)">User:</span> {data.userId ? <Link className="font-mono text-xs hover:underline" href={`/admin/users/${data.userId}`}>{data.userId}</Link> : "guest"}</p>
           <p><span className="text-(--color-muted)">Attempts:</span> {data.attempts}</p>
           <p><span className="text-(--color-muted)">Created:</span> {new Date(data.createdAt).toLocaleString()}</p>

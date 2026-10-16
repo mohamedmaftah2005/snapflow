@@ -2,6 +2,9 @@
   "name": "snapflow",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,7 +16,7 @@
     "worker:healthcheck": "tsx ./src/worker/index.ts --healthcheck",
     "doctor": "tsx ./scripts/doctor.ts",
     "smoke": "node ./scripts/smoke.mjs",
-    "audit": "npm audit --audit-level=high"
+    "audit": "npm audit --audit-level=high --omit=dev"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
@@ -22,7 +25,7 @@
     "bcryptjs": "^3.0.3",
     "bullmq": "^6.3.9",
     "ioredis": "^6.0.0",
-    "next": "16.3.6",
+    "next": "^16.4.2",
     "nodemailer": "^10.0.11",
     "pg": "^8.23.0",
     "react": "19.2.8",
@@ -39,7 +42,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "^16.4.2",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",

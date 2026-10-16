@@ -41,8 +41,21 @@ export async function fetchYtDlpMetadata(normalizedUrl: string, jobTag: string):
 export async function fetchRawMetadata(normalizedUrl: string, jobTag: string): Promise<YtDlpJson & { formats?: unknown }> {
   const res = await runBinary(
     env.ytDlpPath,
-    ["--dump-single-json", "--no-playlist", "--no-warnings", "--socket-timeout", "15", normalizedUrl],
-    { timeoutMs: Math.min(env.jobTimeoutMs, 60_000) }
+    [
+      "--dump-single-json",
+      "--no-playlist",
+      "--no-warnings",
+      "--socket-timeout",
+      "10",
+      "--concurrent-fragments",
+      "4",
+      "--retries",
+      "3",
+      "--fragment-retries",
+      "3",
+      normalizedUrl,
+    ],
+    { timeoutMs: Math.min(env.jobTimeoutMs, 45_000) }
   );
   if (res.exitCode !== 0) throw mapYtDlpFailure(res.stderr, res.exitCode);
   try {

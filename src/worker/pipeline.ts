@@ -165,28 +165,41 @@ export async function processDownload(jobId: string, deps: PipelineDeps): Promis
     }
     if (result.items.length === 0) throw new AppError("PROCESSING_FAILED", "Empty result");
 
+    // Cooperative cancellation: a cancel arriving mid-download stops
+    // the job BEFORE the strip/upload work (previously the strip ran
+    // first and burned an ffmpeg pass on a discarded result).
+    // Tmp is cleaned by the finally block.
+    const fresh = await repo.get(jobId);
+    if (!fresh || fresh.status === "CANCELED" || fresh.status === "EXPIRED") {
+      log(jobId, "canceled during processing, discarding result");
+      return;
+    }
+
     // Metadata strip: lossless stream-copy remux (no re-encode) removing
     // container tags. Best-effort by design — a strip failure keeps the
-    // original file and never fails the download.
+    // original file and never fails the download. Items strip in parallel
+    // (each has its own path/tmp name); single-item jobs are unchanged.
     try {
       const { isEnabled } = await import("@/lib/admin/flags");
       if (await isEnabled("metadata_strip", true)) {
         const { env: liveEnv } = await import("@/lib/config/env");
         const { stripOneFile } = await import("@/lib/media/strip");
         const { checkBinaryAvailable, runBinary } = await import("@/services/downloader/ytdlp");
-        for (const item of result.items) {
-          if (!item.localPath) continue;
-          const out = await stripOneFile(
-            { jobId, localPath: item.localPath },
-            {
-              ffmpegPath: liveEnv.ffmpegPath,
-              timeoutMs: 30_000,
-              checkBinary: (bin, args) => checkBinaryAvailable(bin, args),
-              run: (bin, args, opts) => runBinary(bin, args, opts),
-            }
-          );
-          if (out.filesize !== undefined) item.filesize = out.filesize;
-        }
+        await Promise.all(
+          result.items.map(async (item) => {
+            if (!item.localPath) return;
+            const out = await stripOneFile(
+              { jobId, localPath: item.localPath },
+              {
+                ffmpegPath: liveEnv.ffmpegPath,
+                timeoutMs: 30_000,
+                checkBinary: (bin, args) => checkBinaryAvailable(bin, args),
+                run: (bin, args, opts) => runBinary(bin, args, opts),
+              }
+            );
+            if (out.filesize !== undefined) item.filesize = out.filesize;
+          })
+        );
         log(jobId, "metadata stripped", { items: result.items.length });
       }
     } catch (err) {
@@ -195,42 +208,37 @@ export async function processDownload(jobId: string, deps: PipelineDeps): Promis
       });
     }
 
-    // Cooperative cancellation: a cancel arriving mid-download stops
-    // the job before upload. Tmp is cleaned by the finally block.
-    const fresh = await repo.get(jobId);
-    if (!fresh || fresh.status === "CANCELED" || fresh.status === "EXPIRED") {
-      log(jobId, "canceled during processing, discarding result");
-      return;
-    }
-
     await repo.update(jobId, { status: "UPLOADING" });
     const now = Date.now();
     const expiresAt = now + fileTtlMs;
-    const records: DownloadItemRecord[] = [];
+    // Uploads run in parallel (distinct keys); Promise.all preserves
+    // item order for the records below.
+    const records: DownloadItemRecord[] = await Promise.all(
+      result.items.map(async (item) => {
+        const key = buildObjectKey(jobId, item.itemId);
+        await storage.upload({
+          key,
+          contentType: contentTypeFor(item.container),
+          filePath: item.localPath,
+        });
+        return {
+          id: `${jobId}-${item.itemId}`,
+          jobId,
+          type: item.type,
+          format: item.format,
+          container: item.container,
+          resolution: item.resolution,
+          width: item.width,
+          height: item.height,
+          fileKey: key,
+          fileSize: item.filesize,
+          localPath: storage.kind === "local" ? item.localPath : undefined,
+          expiresAt,
+        } satisfies DownloadItemRecord;
+      })
+    );
     let totalBytes = 0;
-    for (const item of result.items) {
-      const key = buildObjectKey(jobId, item.itemId);
-      await storage.upload({
-        key,
-        contentType: contentTypeFor(item.container),
-        filePath: item.localPath,
-      });
-      totalBytes += item.filesize ?? 0;
-      records.push({
-        id: `${jobId}-${item.itemId}`,
-        jobId,
-        type: item.type,
-        format: item.format,
-        container: item.container,
-        resolution: item.resolution,
-        width: item.width,
-        height: item.height,
-        fileKey: key,
-        fileSize: item.filesize,
-        localPath: storage.kind === "local" ? item.localPath : undefined,
-        expiresAt,
-      });
-    }
+    for (const r of records) totalBytes += r.fileSize ?? 0;
     log(jobId, "uploading done", { items: records.length, bytes: totalBytes });
     await repo.saveItems(jobId, records);
 

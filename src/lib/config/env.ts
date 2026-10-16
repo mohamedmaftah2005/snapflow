@@ -15,6 +15,15 @@ function opt(name: string): string | undefined {
   return raw && raw.length > 0 ? raw : undefined;
 }
 
+function list(name: string): string[] {
+  const raw = process.env[name];
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0);
+}
+
 export const env = {
   appUrl: str("APP_URL", "http://localhost:3000"),
   maxFileSizeBytes: num("MAX_FILE_SIZE", 100 * 1024 * 1024), // 100 MB
@@ -84,6 +93,9 @@ export const env = {
   webhookAllowPrivate: str("WEBHOOK_ALLOW_PRIVATE", "false") === "true",
   apiRateLimitRequests: num("API_RATE_LIMIT_REQUESTS", 100),
   apiRateLimitWindowMs: num("API_RATE_LIMIT_WINDOW", 60_000),
+  // --- Dev-only first-admin bootstrap (comma-separated emails).
+  // Honored only outside production; production ignores it (use SQL).
+  adminEmails: list("ADMIN_EMAILS"),
   // --- Phase 12: growth engine ---
   referralAttributionDays: num("REFERRAL_ATTRIBUTION_DAYS", 30),
   maxReferralRewards: num("MAX_REFERRAL_REWARDS", 50),

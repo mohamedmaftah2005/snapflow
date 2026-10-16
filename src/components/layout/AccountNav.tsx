@@ -30,10 +30,17 @@ export default function AccountNav() {
   }
 
   if (state === "loading") return <span className="w-16" aria-hidden="true" />;
-  // No public sign-in: SnapFlow needs no account. Authenticated sessions
-  // (existing users, operators) still see their dashboard controls below.
-  // The /login route stays functional but unlinked for operator access.
-  if (state === "guest") return null;
+  // Guests get a sign-in entry point; the login page links on to registration.
+  if (state === "guest") {
+    return (
+      <Link
+        href="/login"
+        className="rounded-full border border-(--color-border) px-4 py-2 text-sm font-semibold text-(--color-ink-700) hover:bg-(--color-accent-50)"
+      >
+        Sign in
+      </Link>
+    );
+  }
   return (
     <span className="flex items-center gap-2">
       <Link
