@@ -14,6 +14,7 @@ import type {
 import UrlInput from "./UrlInput";
 import DownloadButton from "./DownloadButton";
 import ProcessingState from "./ProcessingState";
+import FormatPicker, { type PickedFormat } from "./FormatPicker";
 import ResultCard from "./ResultCard";
 import ErrorState from "./ErrorState";
 
@@ -69,6 +70,11 @@ export default function DownloaderCard() {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
+    await startDownload({ kind: "auto" });
+  }
+
+  /** Shared by the main button (best automatic) and picker rows (explicit). */
+  async function startDownload(format: PickedFormat): Promise<void> {
     if (status === "validating" || status === "queued" || status === "processing") return;
     track("download_button_clicked", { provider: "tiktok" });
     const myRequest = ++requestId.current;
@@ -89,15 +95,14 @@ export default function DownloaderCard() {
     track("download_started", { provider: "tiktok" });
 
     try {
-      // No quality prompt: the server always fetches the best available
-      // quality automatically (opts omitted → kind "auto").
       const media = await apiDownloader.createDownload(
         url,
         (job: DownloadJob) => {
           if (requestId.current !== myRequest) return;
           setStatus(job.status);
           if (job.id && job.id !== "api") setJobId(job.id);
-        }
+        },
+        { format }
       );
       if (requestId.current !== myRequest) return;
       setDoneUrl(validation.normalizedUrl ?? url.trim());
@@ -159,9 +164,7 @@ export default function DownloaderCard() {
           onChange={handleChange}
           onPasteEvent={() => track("paste_url", { provider: "tiktok" })}
         />
-        <p className="mt-3 text-center text-xs font-semibold text-(--color-ink-700)">
-          Best available quality is picked automatically.
-        </p>
+        <FormatPicker url={url} disabled={busy} onPick={(f) => void startDownload(f)} />
         <div className="mt-3">
           <DownloadButton status={status} />
         </div>

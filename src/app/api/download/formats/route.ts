@@ -6,7 +6,7 @@ import { checkLimit } from "@/lib/rate-limit-redis";
 import { readJsonBody } from "@/lib/validation/request";
 import { getProviderRegistry } from "@/lib/providers/registry";
 import { normalizeFormats, type MediaFormat } from "@/lib/media/formats";
-import { fetchRawMetadata } from "@/lib/providers/ytdlp";
+import { fetchRawMetadata, normalizeRawMetadata } from "@/lib/providers/ytdlp";
 import { getLimiters } from "@/lib/server";
 
 function errBody(code: string, message: string): { success: false; error: { code: string; message: string } } {
@@ -14,7 +14,14 @@ function errBody(code: string, message: string): { success: false; error: { code
 }
 
 // 10-minute cache: one metadata fetch per URL, not per keystroke.
-const cache = new Map<string, { formats: MediaFormat[]; exp: number }>();
+const cache = new Map<string, { formats: MediaFormat[]; meta: VideoMeta; exp: number }>();
+
+export interface VideoMeta {
+  title?: string;
+  duration?: number;
+  thumbnail?: string;
+  author?: string;
+}
 
 /**
  * Real available formats for a URL (heights that exist + audio if present).
@@ -60,14 +67,16 @@ export async function POST(req: Request): Promise<NextResponse> {
   const key = createHash("sha256").update(`formats:${normalized}`).digest("hex");
   const hit = cache.get(key);
   if (hit && hit.exp > Date.now()) {
-    return NextResponse.json({ success: true, data: { provider: provider.id, formats: hit.formats, cached: true } });
+    return NextResponse.json({ success: true, data: { provider: provider.id, formats: hit.formats, meta: hit.meta, cached: true } });
   }
   try {
     const raw = await fetchRawMetadata(normalized, "formats");
     const formats = normalizeFormats(raw);
+    const full = normalizeRawMetadata(raw, normalized);
+    const meta: VideoMeta = { title: full.title, duration: full.duration, thumbnail: full.thumbnail, author: full.author };
     if (cache.size > 500) cache.clear();
-    cache.set(key, { formats, exp: Date.now() + 10 * 60 * 1000 });
-    return NextResponse.json({ success: true, data: { provider: provider.id, formats } });
+    cache.set(key, { formats, meta, exp: Date.now() + 10 * 60 * 1000 });
+    return NextResponse.json({ success: true, data: { provider: provider.id, formats, meta } });
   } catch (err) {
     const e = err instanceof AppError ? err : new AppError("PROCESSING_FAILED");
     return NextResponse.json(errBody(e.code, e.userMessage), { status: e.status });

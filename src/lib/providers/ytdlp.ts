@@ -65,7 +65,7 @@ export async function fetchRawMetadata(normalizedUrl: string, jobTag: string): P
   }
 }
 
-function normalizeRawMetadata(j: YtDlpJson, normalizedUrl: string): RawMetadata {
+export function normalizeRawMetadata(j: YtDlpJson, normalizedUrl: string): RawMetadata {
   return {
     sourceId: typeof j.id === "string" ? j.id : normalizedUrl,
     title: typeof j.title === "string" ? j.title.slice(0, 300) : undefined,
